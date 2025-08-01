@@ -1,0 +1,148 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Xcode
+xcuserdata/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# VSCode
+.vscode/
+*.code-workspace
+.vscode-test/
+.history/
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# Rust
+/target/
+**/target/
+Cargo.lock
+**/Cargo.lock
+Cargo.toml.orig
+**/Cargo.toml.orig
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# TypeScript
+node_modules/
+.npm
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE specific
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS specific
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Build artifacts
+dist/
+build/
+*.wasm
+*.wat
+*.so
+*.dylib
+*.dll
+*.exe
+
+# Documentation
+*.docx
+*.pdf
+*.odt
+*.xlsx
+*.xls
+*.ods
+*.pptx
+*.ppt
+*.pps
+*.odp
+
+# Test coverage
+coverage/
+*.lcov
+
+# Backup files
+*~
+*.bak
+*.backup
+*.old
+*.orig
+*.rej
+
+# Project specific
+*.sqlite
+*.db
+*.sqlite3
+*.log
+*.key
+*.pem
+*.der
+*.crt
+*.csr
+*.key
+*.p12
+*.pfx
+*.cer
+*.jks
+*.keystore
