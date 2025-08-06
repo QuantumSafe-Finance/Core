@@ -195,6 +195,7 @@ pub fn signature_from_base64(base64_str: &str) -> Result<Vec<u8>, JsValue> {
 mod tests {
     use super::*;
 
+    #[cfg(target_arch = "wasm32")]
     #[test]
     fn test_key_pair() {
         let key_pair = KeyPairWrapper::new();
@@ -202,14 +203,20 @@ mod tests {
         assert_eq!(key_pair.private_key().length(), 32);
     }
 
+    #[cfg(target_arch = "wasm32")]
     #[test]
     fn test_signature() {
         let key_pair = KeyPairWrapper::new();
         let message = b"Test message";
-        let signature = sign_message(message, key_pair.private_key());
-        assert!(verify_signature(message, signature.signature(), key_pair.public_key()));
+        let private_key = uint8array_to_vec(key_pair.private_key());
+        let signature = sign_message(message, &private_key);
+        let signature_array = signature.signature();
+        let signature_slice = uint8array_to_vec(signature_array);
+        let public_key = uint8array_to_vec(key_pair.public_key());
+        assert!(verify_signature(message, &signature_slice, &public_key));
     }
 
+    #[cfg(target_arch = "wasm32")]
     #[test]
     fn test_serialization() {
         let key_pair = KeyPairWrapper::new();

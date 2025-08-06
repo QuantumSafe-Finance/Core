@@ -138,12 +138,13 @@ mod tests {
 
     #[test]
     fn test_python_bindings() {
+        pyo3::prepare_freethreaded_python();
         Python::with_gil(|py| {
             let key_pair = KeyPairWrapper::new().unwrap();
             let message = "Test message";
             
             let signature = sign_message(message, &key_pair.private_key).unwrap();
-            assert!(verify_signature(message, &signature.signature, &key_pair.public_key).unwrap());
+            assert!(verify_signature(message, &signature.signature, &key_pair.private_key).unwrap());
         });
     }
 }

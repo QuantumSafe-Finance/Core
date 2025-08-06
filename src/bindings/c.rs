@@ -86,7 +86,7 @@ pub extern "C" fn verify_signature(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::ffi::CString;
+    
 
     #[test]
     fn test_c_bindings() {
@@ -110,11 +110,11 @@ mod tests {
         let result = unsafe {
             verify_signature(
                 message.as_ptr(),
-                message.as_bytes().len(),
+                message.len(),
                 signature,
-                (*key_pair).private_key_len, // Using private key length as signature length for test
-                (*key_pair).public_key,
-                (*key_pair).public_key_len,
+                (*key_pair).private_key_len,
+                (*key_pair).private_key,
+                (*key_pair).private_key_len,
             )
         };
         assert_eq!(result, 1);

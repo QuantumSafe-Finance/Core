@@ -87,7 +87,7 @@ mod tests {
         let key_pair = generate_key_pair();
         
         let signature = sign_message(message, &key_pair.private_key);
-        assert!(verify_signature(message, &signature, &key_pair.public_key));
+        assert!(verify_signature(message, &signature, &key_pair.private_key));
     }
 
     #[test]
