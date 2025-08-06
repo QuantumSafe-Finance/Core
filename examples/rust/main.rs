@@ -11,12 +11,8 @@ fn main() {
     let message = "Hello, quantum world!";
     let message_bytes = message.as_bytes();
     let signature = crypto::sign_message(message_bytes, &key_pair.private_key);
-    
-    let is_valid = crypto::verify_signature(
-        message_bytes,
-        &signature,
-        &key_pair.public_key
-    );
+
+    let is_valid = crypto::verify_signature(message_bytes, &signature, &key_pair.public_key);
 
     println!("\nSignature verification: {}", is_valid);
 
@@ -33,7 +29,7 @@ fn main() {
         crypto::sign_message(message_bytes, &key_pair.private_key);
     }
     let duration = start.elapsed();
-    
+
     println!("\nPerformance benchmark:");
     println!("Signatures per second: {}", 1000.0 / duration.as_secs_f64());
 }

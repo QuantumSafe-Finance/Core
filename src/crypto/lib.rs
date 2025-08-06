@@ -1,12 +1,12 @@
 //! Quantum-safe cryptography engine implementation
 
-use rand::{thread_rng, Rng};
-use serde::{Deserialize, Serialize};
-use sha3::{Sha3_256, Digest};
-use hmac::{Hmac, Mac};
-use serde_json;
 use base64::engine::general_purpose;
 use base64::Engine;
+use hmac::{Hmac, Mac};
+use rand::{thread_rng, Rng};
+use serde::{Deserialize, Serialize};
+use serde_json;
+use sha3::{Digest, Sha3_256};
 use std::string::String;
 
 /// Quantum-safe key pair
@@ -21,7 +21,7 @@ pub fn generate_key_pair() -> KeyPair {
     let mut rng = thread_rng();
     let private_key: Vec<u8> = (0..32).map(|_| rng.gen()).collect();
     let public_key = hash(&private_key);
-    
+
     KeyPair {
         public_key,
         private_key,
@@ -37,18 +37,16 @@ fn hash(data: &[u8]) -> Vec<u8> {
 
 /// Sign a message using quantum-safe signature
 pub fn sign_message(message: &[u8], private_key: &[u8]) -> Vec<u8> {
-    let mut mac = Hmac::<Sha3_256>::new_from_slice(private_key).expect("HMAC can take key of any size");
+    let mut mac =
+        Hmac::<Sha3_256>::new_from_slice(private_key).expect("HMAC can take key of any size");
     mac.update(message);
     mac.finalize().into_bytes().to_vec()
 }
 
 /// Verify a signature
-pub fn verify_signature(
-    message: &[u8],
-    signature: &[u8],
-    public_key: &[u8],
-) -> bool {
-    let mut mac = Hmac::<Sha3_256>::new_from_slice(public_key).expect("HMAC can take key of any size");
+pub fn verify_signature(message: &[u8], signature: &[u8], public_key: &[u8]) -> bool {
+    let mut mac =
+        Hmac::<Sha3_256>::new_from_slice(public_key).expect("HMAC can take key of any size");
     mac.update(message);
     mac.verify_slice(signature).is_ok()
 }
@@ -66,7 +64,9 @@ pub fn key_pair_from_json(json: &str) -> Result<KeyPair, serde_json::Error> {
 /// Convert signature to base64 string
 pub fn signature_to_base64(signature: &[u8]) -> String {
     let mut buffer = Vec::new();
-    general_purpose::STANDARD.encode_slice(signature, &mut buffer).unwrap();
+    general_purpose::STANDARD
+        .encode_slice(signature, &mut buffer)
+        .unwrap();
     String::from_utf8(buffer).unwrap()
 }
 
@@ -85,7 +85,7 @@ mod tests {
     fn test_signature() {
         let message = b"Test message";
         let key_pair = generate_key_pair();
-        
+
         let signature = sign_message(message, &key_pair.private_key);
         assert!(verify_signature(message, &signature, &key_pair.private_key));
     }

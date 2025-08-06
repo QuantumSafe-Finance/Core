@@ -1,12 +1,12 @@
 //! TypeScript bindings for QuantumSafe Finance
 
-use wasm_bindgen::prelude::*;
-use serde::{Deserialize, ser::SerializeMap};
-use js_sys::Uint8Array;
+use crate::crypto;
 use base64::engine::general_purpose;
 use base64::Engine;
+use js_sys::Uint8Array;
+use serde::{ser::SerializeMap, Deserialize};
 use std::string::String;
-use crate::crypto;
+use wasm_bindgen::prelude::*;
 
 /// Quantum-safe key pair
 #[wasm_bindgen]
@@ -24,7 +24,8 @@ impl serde::Serialize for KeyPairWrapper {
         S: serde::Serializer,
     {
         let public_key_base64 = base64::engine::general_purpose::STANDARD.encode(&self.public_key);
-        let private_key_base64 = base64::engine::general_purpose::STANDARD.encode(&self.private_key);
+        let private_key_base64 =
+            base64::engine::general_purpose::STANDARD.encode(&self.private_key);
         let mut map = serializer.serialize_map(Some(2))?;
         map.serialize_entry("public_key", &public_key_base64)?;
         map.serialize_entry("private_key", &private_key_base64)?;
@@ -44,11 +45,17 @@ impl<'de> serde::Deserialize<'de> for KeyPairWrapper {
         }
 
         let data = KeyPairData::deserialize(deserializer)?;
-        let public_key = base64::engine::general_purpose::STANDARD.decode(&data.public_key)
-            .map_err(|e| serde::de::Error::custom(format!("Invalid base64 in public_key: {}", e)))?;
-        let private_key = base64::engine::general_purpose::STANDARD.decode(&data.private_key)
-            .map_err(|e| serde::de::Error::custom(format!("Invalid base64 in private_key: {}", e)))?;
-        
+        let public_key = base64::engine::general_purpose::STANDARD
+            .decode(&data.public_key)
+            .map_err(|e| {
+                serde::de::Error::custom(format!("Invalid base64 in public_key: {}", e))
+            })?;
+        let private_key = base64::engine::general_purpose::STANDARD
+            .decode(&data.private_key)
+            .map_err(|e| {
+                serde::de::Error::custom(format!("Invalid base64 in private_key: {}", e))
+            })?;
+
         Ok(Self {
             public_key: public_key.into_boxed_slice(),
             private_key: private_key.into_boxed_slice(),
@@ -113,9 +120,10 @@ impl<'de> serde::Deserialize<'de> for Signature {
         }
 
         let data = SignatureData::deserialize(deserializer)?;
-        let signature = base64::engine::general_purpose::STANDARD.decode(&data.signature)
+        let signature = base64::engine::general_purpose::STANDARD
+            .decode(&data.signature)
             .map_err(|e| serde::de::Error::custom(format!("Invalid base64 in signature: {}", e)))?;
-        
+
         Ok(Self {
             signature: signature.into_boxed_slice(),
         })
@@ -150,11 +158,7 @@ pub fn sign_message(message: &[u8], private_key: &[u8]) -> Signature {
 
 /// Verify a signature
 #[wasm_bindgen]
-pub fn verify_signature(
-    message: &[u8],
-    signature: &[u8],
-    public_key: &[u8],
-) -> bool {
+pub fn verify_signature(message: &[u8], signature: &[u8], public_key: &[u8]) -> bool {
     crypto::verify_signature(message, signature, public_key)
 }
 
@@ -186,7 +190,8 @@ pub fn signature_to_base64(signature: &[u8]) -> String {
 #[wasm_bindgen]
 pub fn signature_from_base64(base64_str: &str) -> Result<Vec<u8>, JsValue> {
     let mut buffer = Vec::new();
-    general_purpose::STANDARD.decode_vec(base64_str, &mut buffer)
+    general_purpose::STANDARD
+        .decode_vec(base64_str, &mut buffer)
         .map_err(|e| JsValue::from_str(&format!("Invalid base64: {}", e)))
         .map(|_| buffer)
 }
@@ -222,7 +227,13 @@ mod tests {
         let key_pair = KeyPairWrapper::new();
         let json = key_pair.to_json();
         let deserialized: KeyPairWrapper = serde_json::from_str(&json).unwrap();
-        assert_eq!(key_pair.public_key().to_vec(), deserialized.public_key().to_vec());
-        assert_eq!(key_pair.private_key().to_vec(), deserialized.private_key().to_vec());
+        assert_eq!(
+            key_pair.public_key().to_vec(),
+            deserialized.public_key().to_vec()
+        );
+        assert_eq!(
+            key_pair.private_key().to_vec(),
+            deserialized.private_key().to_vec()
+        );
     }
 }

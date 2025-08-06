@@ -1,11 +1,11 @@
 //! Python bindings for QuantumSafe Finance
 
-use pyo3::prelude::*;
+use crate::crypto;
+use base64::{engine::general_purpose::STANDARD, Engine};
 use pyo3::exceptions::PyValueError;
+use pyo3::prelude::*;
 use pyo3::types::PyType;
 use serde::ser::SerializeMap;
-use base64::{engine::general_purpose::STANDARD, Engine};
-use crate::crypto;
 
 /// Quantum-safe key pair
 #[pyclass]
@@ -28,7 +28,8 @@ impl KeyPairWrapper {
     }
 
     fn __repr__(&self) -> String {
-        format!("KeyPair(public_key_len={}, private_key_len={}", 
+        format!(
+            "KeyPair(public_key_len={}, private_key_len={}",
             self.public_key.len(),
             self.private_key.len()
         )
@@ -38,15 +39,20 @@ impl KeyPairWrapper {
     pub fn from_json(_cls: &PyType, json: &str) -> PyResult<Self> {
         let data: serde_json::Value = serde_json::from_str(json)
             .map_err(|e| PyValueError::new_err(format!("Invalid JSON: {}", e)))?;
-        let public_key = data["public_key"].as_str()
+        let public_key = data["public_key"]
+            .as_str()
             .ok_or_else(|| PyValueError::new_err("Missing public_key in JSON"))?
             .as_bytes()
             .to_vec();
-        let private_key = data["private_key"].as_str()
+        let private_key = data["private_key"]
+            .as_str()
             .ok_or_else(|| PyValueError::new_err("Missing private_key in JSON"))?
             .as_bytes()
             .to_vec();
-        Ok(Self { public_key, private_key })
+        Ok(Self {
+            public_key,
+            private_key,
+        })
     }
 
     #[classmethod]
@@ -68,7 +74,8 @@ impl serde::Serialize for KeyPairWrapper {
         S: serde::Serializer,
     {
         let public_key_base64 = base64::engine::general_purpose::STANDARD.encode(&self.public_key);
-        let private_key_base64 = base64::engine::general_purpose::STANDARD.encode(&self.private_key);
+        let private_key_base64 =
+            base64::engine::general_purpose::STANDARD.encode(&self.private_key);
         let mut map = serializer.serialize_map(Some(2))?;
         map.serialize_entry("public_key", &public_key_base64)?;
         map.serialize_entry("private_key", &private_key_base64)?;
@@ -128,7 +135,11 @@ pub fn sign_message(message: &str, private_key: &[u8]) -> PyResult<Signature> {
 /// Verify a signature
 #[pyfunction]
 pub fn verify_signature(message: &str, signature: &[u8], public_key: &[u8]) -> PyResult<bool> {
-    Ok(crypto::verify_signature(message.as_bytes(), signature, public_key))
+    Ok(crypto::verify_signature(
+        message.as_bytes(),
+        signature,
+        public_key,
+    ))
 }
 
 #[cfg(test)]
@@ -142,9 +153,11 @@ mod tests {
         Python::with_gil(|py| {
             let key_pair = KeyPairWrapper::new().unwrap();
             let message = "Test message";
-            
+
             let signature = sign_message(message, &key_pair.private_key).unwrap();
-            assert!(verify_signature(message, &signature.signature, &key_pair.private_key).unwrap());
+            assert!(
+                verify_signature(message, &signature.signature, &key_pair.private_key).unwrap()
+            );
         });
     }
 }

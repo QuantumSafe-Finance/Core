@@ -1,8 +1,8 @@
 //! C bindings for QuantumSafe Finance
 
+use crate::crypto;
 use std::os::raw::c_int;
 use std::slice;
-use crate::crypto;
 
 /// Quantum-safe key pair
 #[repr(C)]
@@ -19,7 +19,7 @@ pub extern "C" fn generate_key_pair() -> *mut KeyPairWrapper {
     let key_pair = crypto::generate_key_pair();
     let public_key = Box::into_raw(key_pair.public_key.clone().into_boxed_slice());
     let private_key = Box::into_raw(key_pair.private_key.clone().into_boxed_slice());
-    
+
     let result = Box::new(KeyPairWrapper {
         public_key_len: key_pair.public_key.len(),
         private_key_len: key_pair.private_key.len(),
@@ -79,21 +79,20 @@ pub extern "C" fn verify_signature(
     let message_slice = unsafe { slice::from_raw_parts(message, message_len) };
     let signature_slice = unsafe { slice::from_raw_parts(signature, signature_len) };
     let public_key_slice = unsafe { slice::from_raw_parts(public_key, public_key_len) };
-    
+
     crypto::verify_signature(message_slice, signature_slice, public_key_slice) as i32
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    
 
     #[test]
     fn test_c_bindings() {
         // Test key pair generation
         let key_pair = generate_key_pair();
         assert!(!key_pair.is_null());
-        
+
         // Test signing
         let message = b"Test message";
         let signature = unsafe {
@@ -105,7 +104,7 @@ mod tests {
             )
         };
         assert!(!signature.is_null());
-        
+
         // Test verification
         let result = unsafe {
             verify_signature(
@@ -118,7 +117,7 @@ mod tests {
             )
         };
         assert_eq!(result, 1);
-        
+
         // Clean up
         unsafe {
             free_signature(signature);
