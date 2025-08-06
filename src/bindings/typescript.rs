@@ -1,3 +1,6 @@
+#![allow(clippy::uninlined_format_args)]
+#![allow(clippy::new_without_default)]
+
 //! TypeScript bindings for QuantumSafe Finance
 
 use crate::crypto;
@@ -198,8 +201,6 @@ pub fn signature_from_base64(base64_str: &str) -> Result<Vec<u8>, JsValue> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     #[cfg(target_arch = "wasm32")]
     #[test]
     fn test_key_pair() {

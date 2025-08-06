@@ -44,11 +44,12 @@ pub fn sign_message(message: &[u8], private_key: &[u8]) -> Vec<u8> {
 }
 
 /// Verify a signature
-pub fn verify_signature(message: &[u8], signature: &[u8], public_key: &[u8]) -> bool {
+pub fn verify_signature(message: &[u8], signature: &[u8], private_key: &[u8]) -> bool {
     let mut mac =
-        Hmac::<Sha3_256>::new_from_slice(public_key).expect("HMAC can take key of any size");
+        Hmac::<Sha3_256>::new_from_slice(private_key).expect("HMAC can take key of any size");
     mac.update(message);
-    mac.verify_slice(signature).is_ok()
+    let computed_signature = mac.finalize().into_bytes().to_vec();
+    signature == computed_signature
 }
 
 /// Convert key pair to JSON string

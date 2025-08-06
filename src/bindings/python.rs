@@ -1,3 +1,6 @@
+#![allow(clippy::uninlined_format_args)]
+#![allow(non_local_definitions)]
+
 //! Python bindings for QuantumSafe Finance
 
 use crate::crypto;
@@ -118,8 +121,6 @@ impl serde::Serialize for Signature {
 #[pymodule]
 fn quantumsafe_finance(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<KeyPairWrapper>()?;
-    m.add_class::<Signature>()?;
-
     m.add_function(wrap_pyfunction!(sign_message, m)?)?;
     m.add_function(wrap_pyfunction!(verify_signature, m)?)?;
     Ok(())
@@ -150,7 +151,7 @@ mod tests {
     #[test]
     fn test_python_bindings() {
         pyo3::prepare_freethreaded_python();
-        Python::with_gil(|py| {
+        Python::with_gil(|_py| {
             let key_pair = KeyPairWrapper::new().unwrap();
             let message = "Test message";
 
