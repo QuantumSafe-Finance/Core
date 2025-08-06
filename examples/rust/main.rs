@@ -9,10 +9,11 @@ fn main() {
 
     // Example 2: Signing and Verification
     let message = "Hello, quantum world!";
-    let signature = crypto::sign_message(message.as_bytes(), &key_pair.private_key);
+    let message_bytes = message.as_bytes();
+    let signature = crypto::sign_message(message_bytes, &key_pair.private_key);
     
     let is_valid = crypto::verify_signature(
-        message.as_bytes(),
+        message_bytes,
         &signature,
         &key_pair.public_key
     );
@@ -29,7 +30,7 @@ fn main() {
     // Example 4: Performance Benchmark
     let start = std::time::Instant::now();
     for _ in 0..1000 {
-        crypto::sign_message(message.as_bytes(), &key_pair.private_key);
+        crypto::sign_message(message_bytes, &key_pair.private_key);
     }
     let duration = start.elapsed();
     

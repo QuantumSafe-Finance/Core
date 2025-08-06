@@ -3,7 +3,9 @@
 use wasm_bindgen::prelude::*;
 use serde::{Deserialize, ser::SerializeMap};
 use js_sys::Uint8Array;
+use base64::engine::general_purpose;
 use base64::Engine;
+use std::string::String;
 use crate::crypto;
 
 /// Quantum-safe key pair
@@ -172,19 +174,48 @@ pub fn uint8array_to_vec(array: js_sys::Uint8Array) -> Vec<u8> {
     vec
 }
 
+/// Convert signature to base64 string
+#[wasm_bindgen]
+pub fn signature_to_base64(signature: &[u8]) -> String {
+    let mut buffer = String::new();
+    general_purpose::STANDARD.encode_string(signature, &mut buffer);
+    buffer
+}
+
+/// Convert base64 string to signature
+#[wasm_bindgen]
+pub fn signature_from_base64(base64_str: &str) -> Result<Vec<u8>, JsValue> {
+    let mut buffer = Vec::new();
+    general_purpose::STANDARD.decode_vec(base64_str, &mut buffer)
+        .map_err(|e| JsValue::from_str(&format!("Invalid base64: {}", e)))
+        .map(|_| buffer)
+}
+
 #[cfg(test)]
 mod tests {
-    use wasm_bindgen_test::*;
     use super::*;
 
-    wasm_bindgen_test_configure!(run_in_browser);
+    #[test]
+    fn test_key_pair() {
+        let key_pair = KeyPairWrapper::new();
+        assert_eq!(key_pair.public_key().length(), 32);
+        assert_eq!(key_pair.private_key().length(), 32);
+    }
 
-    #[wasm_bindgen_test]
-    async fn test_typescript_bindings() {
-        let key_pair = KeyPair::new();
+    #[test]
+    fn test_signature() {
+        let key_pair = KeyPairWrapper::new();
         let message = b"Test message";
-        
-        let signature = sign_message(message, &key_pair.private_key);
-        assert!(verify_signature(message, &signature.signature, &key_pair.public_key));
+        let signature = sign_message(message, key_pair.private_key());
+        assert!(verify_signature(message, signature.signature(), key_pair.public_key()));
+    }
+
+    #[test]
+    fn test_serialization() {
+        let key_pair = KeyPairWrapper::new();
+        let json = key_pair.to_json();
+        let deserialized: KeyPairWrapper = serde_json::from_str(&json).unwrap();
+        assert_eq!(key_pair.public_key().to_vec(), deserialized.public_key().to_vec());
+        assert_eq!(key_pair.private_key().to_vec(), deserialized.private_key().to_vec());
     }
 }
